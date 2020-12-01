@@ -1,0 +1,79 @@
+---
+title: 'Week 9 Coding Part 1: Multiple linear regression continued'
+author: "Alison Sells"
+date: "11/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+library(GGally)
+library(stargazer)
+```
+
+# Data Viz
+
+```{r}
+penguins %>% 
+  ggpairs()
+```
+
+```{r}
+penguins %>% 
+select(species, bill_length_mm: body_mass_g) %>% 
+  ggpairs(aes(color= species))
+```
+## Build a few different models
+
+1. flipper length and species
+2. flipper length,sex, and species
+3. flipper length,sex, bill length, and species
+4. flipper length,sex, bill length, island, and species
+
+```{r}
+lm1 <- lm(body_mass_g~ flipper_length_mm +species, data= penguins)
+lm1
+
+lm2<- lm(body_mass_g~ flipper_length_mm +species + sex, data= penguins)
+lm2
+
+lm3 <- lm(body_mass_g~ flipper_length_mm +species + sex + bill_length_mm, data= penguins)
+lm3
+
+lm4 <- lm(body_mass_g~ flipper_length_mm +species + sex + bill_length_mm + island, data= penguins)
+lm4
+
+```
+
+
+#Find the AIC value for each model
+- number itself not super useful, just used for comparion
+
+```{r}
+AIC(lm1)
+AIC(lm2)
+AIC(lm3)# lowest one = best balance of model fit and model complexity( but only one factor!)
+AIC(lm4)
+```
+## Use stargazer package for a table with multiple model outputs
+
+```{r, results='asis'}
+stargazer(lm1,lm3,lm4, type = "html")
+```
+## Omitted variable bias
+
+```{r}
+ggplot(data= penguins, aes(x= flipper_length_mm, y = bill_depth_mm))+
+  geom_point()+
+  geom_smooth(method= "lm")
+```
+3 Include Species This time
+
+```{r}
+ggplot(data= penguins, aes(x= flipper_length_mm, y = bill_depth_mm, group= species))+
+  geom_point(aes(color= species))+
+  geom_smooth(method= "lm")
+```
+
